@@ -2,6 +2,7 @@
   "name": "C3 Web Devtools",
   "version": "0.0.1",
   "manifest_version": 2,
+  "minimum_chrome_version": "50",
   "description": "This is a soon to be Chrome extension to assist with C3 web development.",
   "homepage_url": "https://get.cct.ericsson.net",
   "icons": {
@@ -9,12 +10,20 @@
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
+  "devtools_page": "devtools.html",
   "background": {
     "scripts": [
       "src/bg/background.js"
     ],
     "persistent": true
   },
+
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+  "web_accessible_resources": [
+    "devtools.html",
+    "panel.html",
+    "src/devtools/devtools.js"
+  ],
   "permissions": [
     "clipboardRead",
     "clipboardWrite",
