@@ -1,4 +1,4 @@
-<!--
+/*
  * Copyright (C) 2016 Ericsson AB. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,13 +12,33 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- -->
+ */
 
-<!DOCTYPE html>
-<html>
-  <head>
-  </head>
-  <body>
-    HELLO
-  </body>
-</html>
+'use strict'
+
+var port = chrome.runtime.connect({
+  name: 'content',
+})
+
+port.onDisconnect.addListener(() => {
+  console.log('content disconnected!')
+})
+port.onMessage.addListener(message => {
+  console.log('content got message! :D', message)
+  handleMessage(message)
+})
+
+function handleMessage(message) {
+  let handler = logHandlers[message.type]
+  if (handler) {
+    handler(message.content)
+  } else {
+    console.error('got message with no handler:', message)
+  }
+}
+
+var logHandlers = {
+  devtoolsLog(text) {
+    console.log(`%cDEVTOOLS%c: ${text}`, 'color: #80f', 'color:')
+  },
+}
