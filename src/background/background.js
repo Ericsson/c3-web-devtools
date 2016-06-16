@@ -45,12 +45,13 @@ chrome.runtime.onConnect.addListener(port => {
   ports[tab][name] = port
 
   if (ports[tab].content && ports[tab].devtools) {
-    doublePipe(ports[tab].content, ports[tab].devtools)
+    doublePipe(tab)
     ports[tab].devtools.postMessage({type: 'show'})
   }
 })
 
-function doublePipe(content, devtools) {
+function doublePipe(tab) {
+  let {content, devtools} = ports[tab]
   function devtoolsToContent(message) {
     console.log('devtools -> content', message)
     content.postMessage(message)
@@ -66,6 +67,7 @@ function doublePipe(content, devtools) {
     content.onMessage.removeListener(contentToDevtools)
     devtools.disconnect()
     content.disconnect()
+    delete ports[tab]
   }
   devtools.onDisconnect.addListener(shutdown)
   content.onDisconnect.addListener(shutdown)
