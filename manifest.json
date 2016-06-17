@@ -11,11 +11,11 @@
     "128": "icons/icon128.png"
   },
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
-  "web_accessible_resources": [ "src/inject/inject.js"],
+  "web_accessible_resources": [ "build/inject.js"],
   "devtools_page": "devtools.html",
   "background": {
     "scripts": [
-      "src/background/background.js"
+      "build/background.js"
     ],
     "persistent": false
   },
