@@ -45,5 +45,8 @@
     devtoolsLog(text) {
       console.log(`%cDEVTOOLS%c: ${text}`, 'color: #80f', 'color:')
     },
+    ping() {
+      sendMessage('show')
+    },
   }
 })()

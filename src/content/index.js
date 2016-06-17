@@ -22,13 +22,17 @@ var port = chrome.runtime.connect({
 
 port.onDisconnect.addListener(() => {
   console.log('content disconnected!')
+  port = null
 })
 
-port.onMessage.addListener(message => {
-  console.log('content got message! :D', message)
-  message.source = 'c3-devtools-bridge'
-  window.postMessage(message, '*')
+port.onMessage.addListener(({type, content}) => {
+  console.log('content got message! :D', type, content);
+  sendMessage(type, content)
 })
+
+function sendMessage(type, content) {
+  window.postMessage({source: 'c3-devtools-bridge', type, content}, '*')
+}
 
 window.addEventListener('message', event => {
   if (event.source !== window) {
@@ -42,6 +46,10 @@ window.addEventListener('message', event => {
 
   if (message.source === 'c3-devtools-page') {
     console.log('got window message: ', event.data)
-    port.postMessage(message)
+    if (port) {
+      port.postMessage(message)
+    }
   }
 })
+
+sendMessage('ping')

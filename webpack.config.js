@@ -3,11 +3,11 @@ var path = require('path')
 var webpack = require('webpack')
 
 module.exports = {
-  devtool: 'source-map',
   entry: {
     background: './src/background/',
     content: './src/content/',
     devtools: './src/devtools/',
+    panel: './src/panel/',
     inject: './src/inject/',
   },
   module: {

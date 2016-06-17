@@ -59,7 +59,7 @@ function executeScript(scriptName) {
   })
 }
 
-executeScript('src/inject/inject.js').then(() => {
+executeScript('build/inject.js').then(() => {
   log('injected script!')
 }).catch(error => {
   console.error(error)

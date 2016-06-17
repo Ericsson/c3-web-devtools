@@ -31,7 +31,7 @@ chrome.runtime.onConnect.addListener(port => {
     tab = +port.name.replace('devtools-', '')
 
     console.log(`telling ${tab} to load content script ` + new Date().toISOString())
-    chrome.tabs.executeScript(tab, {file: '/src/content/content.js'}, () => {})
+    chrome.tabs.executeScript(tab, {file: 'build/content.js'}, () => {})
   } else if (port.name === 'content') {
     name = 'content'
     tab = port.sender.tab.id
