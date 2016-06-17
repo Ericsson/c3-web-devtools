@@ -4,7 +4,7 @@
   "description": "A Chrome extension to assist with C3 web development.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "webpack"
   },
   "repository": {
     "type": "git",
