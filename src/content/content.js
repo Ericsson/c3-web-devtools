@@ -23,22 +23,25 @@ var port = chrome.runtime.connect({
 port.onDisconnect.addListener(() => {
   console.log('content disconnected!')
 })
+
 port.onMessage.addListener(message => {
   console.log('content got message! :D', message)
-  handleMessage(message)
+  message.source = 'c3-devtools-bridge'
+  window.postMessage(message, '*')
 })
 
-function handleMessage(message) {
-  let handler = logHandlers[message.type]
-  if (handler) {
-    handler(message.content)
-  } else {
-    console.error('got message with no handler:', message)
+window.addEventListener('message', event => {
+  if (event.source !== window) {
+    return
   }
-}
 
-var logHandlers = {
-  devtoolsLog(text) {
-    console.log(`%cDEVTOOLS%c: ${text}`, 'color: #80f', 'color:')
-  },
-}
+  let message = event.data
+  if (typeof(message) !== 'object') {
+    return
+  }
+
+  if (message.source === 'c3-devtools-page') {
+    console.log('got window message: ', event.data)
+    port.postMessage(message)
+  }
+})

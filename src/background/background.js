@@ -18,6 +18,10 @@
 
 const ports = {}
 
+chrome.runtime.onConnectExternal.addListener(port => {
+  console.log('got external conneciton', port)
+})
+
 chrome.runtime.onConnect.addListener(port => {
   let name = null
   let tab = null
@@ -46,7 +50,6 @@ chrome.runtime.onConnect.addListener(port => {
 
   if (ports[tab].content && ports[tab].devtools) {
     doublePipe(tab)
-    ports[tab].devtools.postMessage({type: 'show'})
   }
 })
 

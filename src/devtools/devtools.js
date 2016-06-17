@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2016 Ericsson AB. All rights reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -21,30 +21,64 @@ var port = chrome.runtime.connect({
 })
 
 function log(content) {
+  console.log(content)
   port.postMessage({type: 'devtoolsLog', content})
 }
 
 port.onMessage.addListener(message => {
   log('devtools got message: ' + JSON.stringify(message))
-  handleMessage(message)
-})
 
-function handleMessage(message) {
   let handler = logHandlers[message.type]
   if (handler) {
     handler(message.content)
   } else {
     log('got message with no handler:', message)
   }
+})
+
+function executeScript(scriptName) {
+  let script = `
+    if (window.__CCT_INSTANCES__) {
+      let script = document.createElement('script')
+      script.src = "${chrome.extension.getURL(scriptName)}"
+      script.setAttribute('c3DevtoolsExtensionId', '${chrome.runtime.id}')
+      console.log('injecting script', script)
+      document.head.appendChild(script)
+      script.parentNode.removeChild(script)
+    }
+  `
+
+  return new Promise((resolve, reject) => {
+    chrome.devtools.inspectedWindow.eval(script, (res, err) => {
+      if (err) {
+        reject(err)
+      } else {
+        resolve()
+      }
+    })
+  })
 }
+
+executeScript('src/inject/inject.js').then(() => {
+  log('injected script!')
+}).catch(error => {
+  console.error(error)
+  log(`failed to inject script :( ${error}`)
+})
 
 var logHandlers = {
   show() {
     chrome.devtools.panels.create("C3 Web",
       "icons/icon128.png",
-      "Panel.html",
-      function(panel) {
+      "panel.html",
+      panel => {
         log('showing panel')
+        panel.onShown.addListener(function(window) {
+          log('show panel')
+        })
+        panel.onHidden.addListener(function() {
+          log('hide panel')
+        })
       }
     )
   },
