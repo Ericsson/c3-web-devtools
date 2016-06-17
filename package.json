@@ -1,0 +1,30 @@
+{
+  "name": "c3-web-devtools",
+  "version": "0.0.1",
+  "description": "A Chrome extension to assist with C3 web development.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ericsson/c3-web-devtools.git"
+  },
+  "keywords": [
+    "Ericsson",
+    "C3",
+    "c3-web",
+    "devtools",
+    "webrtc",
+    "rtc",
+    "contextual",
+    "communication"
+  ],
+  "author": "Patrik Oldsberg <patrik.oldsberg@ericsson.com>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/Ericsson/c3-web-devtools/issues"
+  },
+  "homepage": "https://github.com/Ericsson/c3-web-devtools#readme",
+  "private": true
+}
