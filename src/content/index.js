@@ -52,4 +52,4 @@ window.addEventListener('message', event => {
   }
 })
 
-sendMessage('ping')
+setTimeout(() => sendMessage('ping'), 1000)
