@@ -10,31 +10,31 @@ let styles = {
 }
 
 class RootView extends React.Component {
-	constructor() {
-		super()
-		this.state = {
-			content: null,
-		}
-	}
-	componentDidMount() {
-		var port = chrome.runtime.connect({
-			name: `panel-${chrome.devtools.inspectedWindow.tabId}`,
-		})
-		port.onMessage.addListener((event) => {
-			this.setState({
-				content: event.content || event,
-			})
-		})
-	}
-	componentWillUnmount() {
-	}
-	render() {
-		return (
-			<div style={styles.rootStyle}>
-				<span>Hello react world!</span>
-			</div>
-		)
-	}
+  constructor() {
+    super()
+    this.state = {
+      content: null,
+    }
+  }
+  componentDidMount() {
+    var port = chrome.runtime.connect({
+      name: `panel-${chrome.devtools.inspectedWindow.tabId}`,
+    })
+    port.onMessage.addListener((event) => {
+      this.setState({
+        content: event.content || event,
+      })
+    })
+  }
+  componentWillUnmount() {
+  }
+  render() {
+    return (
+      <div style={styles.rootStyle}>
+        <span>Hello react world!</span>
+      </div>
+    )
+  }
 }
 
 export default RootView

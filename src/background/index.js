@@ -37,10 +37,10 @@ chrome.runtime.onConnect.addListener(port => {
     tab = port.sender.tab.id
     console.log(`got connection: ${tab}`)
   } else if (port.name.startsWith('panel-')) {
-		name = 'panel'
-		tab = +port.name.replace('panel-', '')
-		console.log(`connected to panel: ${tab}`);
-	} else {
+    name = 'panel'
+    tab = +port.name.replace('panel-', '')
+    console.log(`connected to panel: ${tab}`)
+  } else {
     return console.error(`Got connection with unknown name: ${port.name}`)
   }
 
@@ -48,16 +48,16 @@ chrome.runtime.onConnect.addListener(port => {
     ports[tab] = {
       content: 0,
       devtools: 0,
-			panel: 0,
+      panel: 0,
     }
   }
   ports[tab][name] = port
   if (ports[tab].content && ports[tab].devtools && ports[tab].panel) {
-		extendPipe(tab)
+    extendPipe(tab)
   } else
-	if (ports[tab].content && ports[tab].devtools) {
-		doublePipe(tab)
-	}
+  if (ports[tab].content && ports[tab].devtools) {
+    doublePipe(tab)
+  }
 })
 
 function doublePipe(tab) {
@@ -84,31 +84,28 @@ function doublePipe(tab) {
 }
 
 function extendPipe(tab) {
-	let {panel, content, devtools} = ports[tab]
-	function devtoolsToPanel(message) {
-		console.log('devtools -> panel', message)
-		panel.postMessage(message)
-	}
-	function contentToPanel(message) {
-		console.log('content -> panel', message)
-		panel.postMessage(message)
-	}
-	function allToPanel(message) {
-		console.log('content -> panel', message)
-		panel.postMessage(message)
-	}
+  let {panel, content, devtools} = ports[tab]
+  function devtoolsToPanel(message) {
+    console.log('devtools -> panel', message)
+    panel.postMessage(message)
+  }
+  function contentToPanel(message) {
+    console.log('content -> panel', message)
+    panel.postMessage(message)
+  }
+  function allToPanel(message) {
+    console.log('content -> panel', message)
+    panel.postMessage(message)
+  }
 
-	devtools.onMessage.addListener(devtoolsToPanel)
-	content.onMessage.addListener(contentToPanel)
-	function shutdown() {
-		devtools.onMessage.removeListener(devtoolsToPanel)
-		content.onMessage.removeListener(contentToPanel)
-		devtools.disconnect()
-		content.disconnect()
-		panel.disconnect()
-		delete ports[tab]
-	}
-	devtools.onDisconnect.addListener(shutdown)
-	content.onDisconnect.addListener(shutdown)
-	panel.onDisconnect.addListener(shutdown)
+  devtools.onMessage.addListener(devtoolsToPanel)
+  content.onMessage.addListener(contentToPanel)
+  function shutdown() {
+    devtools.onMessage.removeListener(devtoolsToPanel)
+    content.onMessage.removeListener(contentToPanel)
+    panel.disconnect()
+  }
+  devtools.onDisconnect.addListener(shutdown)
+  content.onDisconnect.addListener(shutdown)
+  panel.onDisconnect.addListener(shutdown)
 }
