@@ -4,7 +4,7 @@
   "description": "A Chrome extension to assist with C3 web development.",
   "main": "index.js",
   "scripts": {
-    "build": "webpack"
+    "build": "webpack --watch"
   },
   "repository": {
     "type": "git",
