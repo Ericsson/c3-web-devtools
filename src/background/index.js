@@ -29,6 +29,10 @@ chrome.runtime.onConnect.addListener(port => {
   if (port.name.startsWith('devtools-')) {
     name = 'devtools'
     tab = +port.name.replace('devtools-', '')
+    if (isNaN(tab)) {
+      console.log(`got devtools port with invalid name: ${port.name}`)
+      return
+    }
 
     console.log(`telling ${tab} to load content script ` + new Date().toISOString())
     chrome.tabs.executeScript(tab, {file: 'build/content.js'}, () => {})
