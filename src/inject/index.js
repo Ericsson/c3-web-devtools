@@ -21,6 +21,20 @@
     window.postMessage({source: 'c3-devtools-page', type, content}, '*')
   }
 
+  function serialize(obj) {
+    let cache = []
+    return JSON.stringify(obj, (key, value) => {
+      if (typeof value === 'object' && value !== null) {
+        if (cache.indexOf(value) !== -1) {
+          return
+        }
+        cache.push(value)
+      }
+      return value
+    })
+    cache = null
+  }
+
   window.addEventListener('message', event => {
     if (event.source !== window) {
       return
@@ -49,7 +63,7 @@
         return
       }
       pinged = true
-      sendMessage('show')
+      sendMessage('show', serialize(window.__CCT_INSTANCES__[0]))
     },
   }
 })()

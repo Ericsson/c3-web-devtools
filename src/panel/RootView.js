@@ -32,6 +32,7 @@ class RootView extends React.Component {
     return (
       <div style={styles.rootStyle}>
         <span>Hello react world!</span>
+        {this.state.content}
       </div>
     )
   }

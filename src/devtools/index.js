@@ -67,7 +67,7 @@ executeScript('build/inject.js').then(() => {
 })
 
 var logHandlers = {
-  show() {
+  show(info) {
     chrome.devtools.panels.create("C3 Web",
       "icons/icon128.png",
       "panel.html",
@@ -75,6 +75,7 @@ var logHandlers = {
         log('showing panel')
         panel.onShown.addListener(function(window) {
           log('show panel')
+          log(info)
         })
         panel.onHidden.addListener(function() {
           log('hide panel')
