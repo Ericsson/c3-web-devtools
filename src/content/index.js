@@ -52,4 +52,4 @@ window.addEventListener('message', event => {
   }
 })
 
-setTimeout(() => sendMessage('ping'), 1000)
+port.postMessage({type: 'init'})

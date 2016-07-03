@@ -53,17 +53,10 @@
     }
   })
 
-  var pinged = false
   var logHandlers = {
     devtoolsLog(text) {
       console.log(`%cDEVTOOLS%c: ${text}`, 'color: #80f', 'color:')
     },
-    ping() {
-      if(pinged) {
-        return
-      }
-      pinged = true
-      sendMessage('show', serialize(window.__CCT_INSTANCES__[0]))
-    },
   }
+  sendMessage('show', serialize(window.__CCT_INSTANCES__[0]))
 })()

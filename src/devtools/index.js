@@ -59,13 +59,6 @@ function executeScript(scriptName) {
   })
 }
 
-executeScript('build/inject.js').then(() => {
-  log('injected script!')
-}).catch(error => {
-  console.error(error)
-  log(`failed to inject script :( ${error}`)
-})
-
 var logHandlers = {
   show(info) {
     chrome.devtools.panels.create("C3 Web",
@@ -75,7 +68,6 @@ var logHandlers = {
         log('showing panel')
         panel.onShown.addListener(function(window) {
           log('show panel')
-          log(info)
         })
         panel.onHidden.addListener(function() {
           log('hide panel')
@@ -83,4 +75,13 @@ var logHandlers = {
       }
     )
   },
+  init() {
+    // delay until content is connected
+    executeScript('build/inject.js').then(() => {
+      log('injected script!')
+    }).catch(error => {
+      console.error(error)
+      log(`failed to inject script :( ${error}`)
+    })
+  }
 }
