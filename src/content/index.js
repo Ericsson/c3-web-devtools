@@ -23,6 +23,8 @@ var port = chrome.runtime.connect({
 port.onDisconnect.addListener(() => {
   console.log('content disconnected!')
   port = null
+  window.postMessage({type: 'nuke'}, '*')
+  window.removeEventListener('message', messageListener)
 })
 
 port.onMessage.addListener(({type, content}) => {
@@ -34,7 +36,7 @@ function sendMessage(type, content) {
   window.postMessage({source: 'c3-devtools-bridge', type, content}, '*')
 }
 
-window.addEventListener('message', event => {
+function messageListener(event) {
   if (event.source !== window) {
     return
   }
@@ -50,6 +52,7 @@ window.addEventListener('message', event => {
       port.postMessage(message)
     }
   }
-})
+}
 
+window.addEventListener('message', messageListener)
 port.postMessage({type: 'init'})

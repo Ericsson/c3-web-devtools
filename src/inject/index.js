@@ -35,9 +35,13 @@
     cache = null
   }
 
-  window.addEventListener('message', event => {
+  function messageListener(event) {
     if (event.source !== window) {
       return
+    }
+
+    if (event.data.type === 'nuke') {
+      window.removeEventListener('message', messageListener)
     }
 
     let message = event.data
@@ -51,12 +55,13 @@
         }
       }
     }
-  })
+  }
+  window.addEventListener('message', messageListener)
 
   var logHandlers = {
     devtoolsLog(text) {
       console.log(`%cDEVTOOLS%c: ${text}`, 'color: #80f', 'color:')
     },
   }
-  sendMessage('show', serialize(window.__CCT_INSTANCES__[0]))
+  sendMessage('show', /*serialize(window.__CCT_INSTANCES__[0]) + Math.random().toString()*/)
 })()
