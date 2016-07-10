@@ -87,7 +87,8 @@ function extendPipe(tab) {
   let {panel, content, devtools} = ports[tab]
   function devtoolsToPanel(message) {
     console.log('devtools -> panel', message)
-    panel.postMessage(message)
+    // turning it off because we don't want to propagate certain events
+    //panel.postMessage(message)
   }
   function contentToPanel(message) {
     console.log('content -> panel', message)

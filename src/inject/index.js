@@ -62,6 +62,9 @@
     devtoolsLog(text) {
       console.log(`%cDEVTOOLS%c: ${text}`, 'color: #80f', 'color:')
     },
+    devtoolsRequestData() {
+      sendMessage('c3-data', serialize(window.__CCT_INSTANCES__[0]))
+    }
   }
-  sendMessage('show', /*serialize(window.__CCT_INSTANCES__[0]) + Math.random().toString()*/)
+  sendMessage('show', serialize(window.__CCT_INSTANCES__[0]))
 })()

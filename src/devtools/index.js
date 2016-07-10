@@ -59,6 +59,12 @@ function executeScript(scriptName) {
   })
 }
 
+function requestData() {
+  log('Requesting data to the panel!')
+  port.postMessage({type: 'devtoolsRequestData'})
+}
+
+
 var logHandlers = {
   show(info) {
     chrome.devtools.panels.create("C3 Web",
@@ -68,6 +74,7 @@ var logHandlers = {
         log('showing panel')
         panel.onShown.addListener(function(window) {
           log('show panel')
+          requestData()
         })
         panel.onHidden.addListener(function() {
           log('hide panel')
