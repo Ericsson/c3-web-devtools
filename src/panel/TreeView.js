@@ -8,6 +8,9 @@ let styles = {
   },
   toggler: {
     fontWeight: 'bold',
+  },
+  label: {
+    color: 'purple'
   }
 }
 
@@ -50,7 +53,7 @@ class TreeView extends React.Component {
     return (
       <div style={styles.rootStyle} >
         <span style={styles.toggler} onClick={this.clickHandler}>{this.state.active ? 'less ' : 'more '}</span>
-        {props.label}
+        <span style={styles.label}>{props.label}</span>
         {data}
       </div>
     )
