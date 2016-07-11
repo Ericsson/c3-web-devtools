@@ -29,12 +29,12 @@ class TreeView extends React.Component {
     this.setState({active : !this.state.active})
   }
   render() {
-    let depth = this.props.depth + 1
-    let data = ''
     let props = this.props
+    let depth = props.depth + 1
+    let data = ''
     styles.rootStyle.paddingLeft = (depth * 2) + 'px'
-    if (this.props.data && props.active || this.state.active) {
-      let obj = this.props.data
+    let obj = props.data
+    if (obj && props.active || this.state.active) {
       if (typeof obj === 'object') {
         data = Object.keys(obj).map((key) =>
           <TreeView data={obj[key]} depth={depth} label={key}/>
