@@ -1,5 +1,6 @@
 
 import React from 'react'
+import CircularJSON from 'circular-json'
 import TreeView from './TreeView'
 
 let styles = {
@@ -36,7 +37,7 @@ class RootView extends React.Component {
   render() {
     let data = 'no data yet...'
     if (this.state.content) {
-      data = <TreeView data={JSON.parse(this.state.content)} depth={1} active={true} label={'root'} />
+      data = <TreeView data={CircularJSON.parse(this.state.content)} depth={1} active={true} label={'root'} />
     }
     return (
       <div style={styles.rootStyle}>

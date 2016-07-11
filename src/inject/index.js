@@ -16,23 +16,11 @@
 
 'use strict'
 
+import CircularJSON from 'circular-json'
+
 ;(() => {
   function sendMessage(type, content) {
     window.postMessage({source: 'c3-devtools-page', type, content}, '*')
-  }
-
-  function serialize(obj) {
-    let cache = []
-    return JSON.stringify(obj, (key, value) => {
-      if (typeof value === 'object' && value !== null) {
-        if (cache.indexOf(value) !== -1) {
-          return
-        }
-        cache.push(value)
-      }
-      return value
-    })
-    cache = null
   }
 
   function messageListener(event) {
@@ -63,8 +51,8 @@
       console.log(`%cDEVTOOLS%c: ${text}`, 'color: #80f', 'color:')
     },
     devtoolsRequestData() {
-      sendMessage('c3-data', serialize(window.__CCT_INSTANCES__[0]))
+      sendMessage('c3-data', CircularJSON.stringify(window.__CCT_INSTANCES__[0]))
     }
   }
-  sendMessage('show', serialize(window.__CCT_INSTANCES__[0]))
+  sendMessage('show')
 })()
