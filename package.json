@@ -36,5 +36,8 @@
     "react": "^15.1.0",
     "react-dom": "^15.1.0",
     "webpack": "^1.13.1"
+  },
+  "dependencies": {
+    "circular-json": "^0.3.0"
   }
 }
