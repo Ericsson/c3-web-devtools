@@ -22,25 +22,20 @@ const port = chrome.runtime.connect({
   name: `devtools-${chrome.devtools.inspectedWindow.tabId}`,
 })
 
-function log(content) {
-  console.log(content)
-  port.postMessage({type: 'devtoolsLog', content})
-}
-
 port.onMessage.addListener(message => {
-  log('devtools got message: ' + JSON.stringify(message))
+  console.log('devtools got message: ' + JSON.stringify(message))
 
   let handler = messageHandlers[message.type]
   if (handler) {
     handler(message.content)
   } else {
-    log('got message with no handler:', message)
+    console.log('got message with no handler:', message)
   }
 })
 
 const messageHandlers = {
   init() {
-    log('Starting SDK poll')
+    console.log('Starting SDK poll')
     startSdkPoll()
   }
 }
@@ -54,9 +49,9 @@ function startSdkPoll() {
   sdkPollIntervalId = setInterval(() => {
     chrome.devtools.inspectedWindow.eval('!!window.__C3_SDK_INSTANCES__', (present, err) => {
       if (err) {
-        warn('Failed to poll SDK presence: ' + err)
+        console.warn('Failed to poll SDK presence: ' + err)
       } else {
-        log('SDK present: ' + present) // TODO: nope
+        console.log('SDK present: ' + present) // TODO: nope
         if (present) {
           clearInterval(sdkPollIntervalId)
           sdkPollIntervalId = 0
