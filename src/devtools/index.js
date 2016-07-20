@@ -38,7 +38,7 @@ port.onMessage.addListener(message => {
 
 function executeScript(scriptName) {
   let script = `
-    if (window.__CCT_INSTANCES__) {
+    if (window.__C3_SDK_INSTANCES__) {
       let script = document.createElement('script')
       script.src = "${chrome.extension.getURL(scriptName)}"
       script.setAttribute('c3DevtoolsExtensionId', '${chrome.runtime.id}')
