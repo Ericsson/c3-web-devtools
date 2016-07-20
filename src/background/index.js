@@ -16,97 +16,117 @@
 
 'use strict'
 
-const ports = {}
+const portBundles = {}
 
 chrome.runtime.onConnect.addListener(port => {
   let name = null
   let tab = null
 
   if (port.name.startsWith('devtools-')) {
-    name = 'devtools'
     tab = +port.name.replace('devtools-', '')
     if (isNaN(tab)) {
-      console.log(`got devtools port with invalid name: ${port.name}`)
+      console.log(`[${tab}] got devtools port with invalid name: ${port.name}`)
       return
     }
-
-    console.log(`telling ${tab} to load content script ` + new Date().toISOString())
-    chrome.tabs.executeScript(tab, {file: 'build/content.js'}, () => {})
+    setupDevtoolsChannel(tab, port)
   } else if (port.name === 'content') {
     name = 'content'
     tab = port.sender.tab.id
-    console.log(`got connection: ${tab}`)
+    console.log(`[${tab}] got content script connection`)
   } else if (port.name.startsWith('panel-')) {
     name = 'panel'
     tab = +port.name.replace('panel-', '')
-    console.log(`connected to panel: ${tab}`)
+    console.log(`[${tab}] got panel connection`)
   } else {
-    return console.error(`Got connection with unknown name: ${port.name}`)
+    return console.error(`[${tab}] got connection with unknown name: ${port.name}`)
   }
 
-  if (!ports[tab]) {
-    ports[tab] = {
-      content: 0,
-      devtools: 0,
-      panel: 0,
+  if (!portBundles[tab]) {
+    port.disconnect()
+  } else {
+    portBundles[tab][name] = port
+    if (portBundles[tab].content && portBundles[tab].panel) {
+      doublePipe(tab)
     }
   }
-  ports[tab][name] = port
-  if (ports[tab].content && ports[tab].devtools && ports[tab].panel) {
-    extendPipe(tab)
-  } else
-  if (ports[tab].content && ports[tab].devtools) {
-    doublePipe(tab)
+})
+
+function setupDevtoolsChannel(tab, port) {
+  if (portBundles[tab]) {
+    console.error(`[${tab}] got duplicate devtools connection`)
+  } else {
+    console.info(`[${tab}] got devtools connection`)
+  }
+  portBundles[tab] = {
+    devtools: port,
+    content: null,
+    panel: null,
+  }
+
+  port.onMessage.addListener(message => {
+    console.log(`[${tab}] background got message from devtools: ${JSON.stringify(message)}`)
+
+    if (message.type === 'sdkFound') {
+      console.log(`[${tab}] loading content script`)
+      chrome.tabs.executeScript(tab, {
+        file: 'build/content.js',
+        runAt: 'document_end',
+      }, () => {
+        console.log(`[${tab}] content script execute result: `, arguments)
+      })
+    }
+  })
+  port.onDisconnect.addListener(() => {
+    console.log(`[${tab}] devtools were disconnected`)
+    let bundle = portBundles[tab]
+    if (bundle && bundle.content) {
+      bundle.content.disconnect()
+    }
+    delete portBundles[tab]
+  })
+  port.postMessage({type: 'start'})
+}
+
+chrome.tabs.onUpdated.addListener((tab, changeInfo) => {
+  if (changeInfo.status === 'loading') {
+    console.log(`[${tab}] loading started`)
+    let bundle = portBundles[tab]
+    if (bundle && bundle.devtools) {
+      bundle.devtools.postMessage({type: 'stop'})
+    }
+  } else if (changeInfo.status === 'complete') {
+    console.log(`[${tab}] loading completed`)
+    let bundle = portBundles[tab]
+    if (bundle && bundle.devtools) {
+      bundle.devtools.postMessage({type: 'start'})
+    }
   }
 })
 
 function doublePipe(tab) {
-  let {content, devtools} = ports[tab]
-  function devtoolsToContent(message) {
-    console.log('devtools -> content', message)
+  let {content, panel} = portBundles[tab]
+  function panelToContent(message) {
+    console.log(`[${tab}] panel -> content`, message)
     content.postMessage(message)
   }
-  function contentToDevtools(message) {
-    console.log('content -> devtools', message)
-    devtools.postMessage(message)
-  }
-  devtools.onMessage.addListener(devtoolsToContent)
-  content.onMessage.addListener(contentToDevtools)
-  function shutdown() {
-    devtools.onMessage.removeListener(devtoolsToContent)
-    content.onMessage.removeListener(contentToDevtools)
-    devtools.disconnect()
-    content.disconnect()
-    delete ports[tab]
-  }
-  devtools.onDisconnect.addListener(shutdown)
-  content.onDisconnect.addListener(shutdown)
-}
-
-function extendPipe(tab) {
-  let {panel, content, devtools} = ports[tab]
-  function devtoolsToPanel(message) {
-    console.log('devtools -> panel', message)
-    // turning it off because we don't want to propagate certain events
-    //panel.postMessage(message)
-  }
   function contentToPanel(message) {
-    console.log('content -> panel', message)
+    console.log(`[${tab}] content -> panel`, message)
     panel.postMessage(message)
   }
-  function allToPanel(message) {
-    console.log('content -> panel', message)
-    panel.postMessage(message)
-  }
-
-  devtools.onMessage.addListener(devtoolsToPanel)
+  panel.onMessage.addListener(panelToContent)
   content.onMessage.addListener(contentToPanel)
-  function shutdown() {
-    devtools.onMessage.removeListener(devtoolsToPanel)
+
+  content.onDisconnect.addListener(() => {
+    console.log(`[${tab}] content script was disconnected`)
+    panel.onMessage.removeListener(panelToContent)
     content.onMessage.removeListener(contentToPanel)
-    panel.disconnect()
-  }
-  devtools.onDisconnect.addListener(shutdown)
-  content.onDisconnect.addListener(shutdown)
-  panel.onDisconnect.addListener(shutdown)
+    content.disconnect()
+    if (portBundles[tab]) {
+      portBundles[tab].content = null
+
+      if (portBundles[tab].panel) {
+        portBundles[tab].panel.postMessage({type: 'clear'})
+      }
+    }
+  })
 }
