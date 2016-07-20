@@ -18,41 +18,38 @@
 
 import CircularJSON from 'circular-json'
 
-;(() => {
-  function sendMessage(type, content) {
-    window.postMessage({source: 'c3-devtools-page', type, content}, '*')
+function sendMessage(type, content) {
+  window.postMessage({source: 'c3-devtools-page', type, content}, '*')
+}
+
+function messageListener(event) {
+  if (event.source !== window) {
+    return
   }
 
-  function messageListener(event) {
-    if (event.source !== window) {
-      return
-    }
-
-    if (event.data.type === 'nuke') {
-      window.removeEventListener('message', messageListener)
-    }
-
-    let message = event.data
-    if (typeof(message) === 'object') {
-      if (message.source === 'c3-devtools-bridge') {
-        let handler = logHandlers[message.type]
-        if (handler) {
-          handler(message.content)
-        } else {
-          console.error('got message with no handler:', message)
-        }
+  let message = event.data
+  if (typeof(message) === 'object') {
+    if (message.source === 'c3-devtools-bridge') {
+      let handler = messageHandlers[message.type]
+      if (handler) {
+        handler(message.content)
+      } else {
+        console.error('got message with no handler:', message)
       }
     }
   }
-  window.addEventListener('message', messageListener)
+}
 
-  var logHandlers = {
-    devtoolsLog(text) {
-      console.log(`%cDEVTOOLS%c: ${text}`, 'color: #80f', 'color:')
-    },
-    devtoolsRequestData() {
-      sendMessage('c3-data', CircularJSON.stringify(window.__C3_SDK_INSTANCES__.client[0]))
-    }
-  }
-  sendMessage('show')
-})()
+window.addEventListener('message', messageListener)
+
+const messageHandlers = {
+  nuke() {
+    window.removeEventListener('message', messageListener)
+  },
+  devtoolsLog(text) {
+    console.log(`%cDEVTOOLS%c: ${text}`, 'color: #80f', 'color:')
+  },
+  devtoolsRequestData() {
+    sendMessage('c3-data', CircularJSON.stringify(window.__C3_SDK_INSTANCES__.client[0]))
+  },
+}
