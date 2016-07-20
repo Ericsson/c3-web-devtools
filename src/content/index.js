@@ -61,4 +61,3 @@ function messageListener(event) {
 }
 
 window.addEventListener('message', messageListener)
-port.postMessage({type: 'init'})
