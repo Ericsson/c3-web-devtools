@@ -16,6 +16,15 @@
 
 'use strict'
 
+
+console.info('Injecting C3 SDK web tools script')
+
+var scriptTag = document.createElement('script')
+scriptTag.src = chrome.extension.getURL('build/inject.js')
+document.head.appendChild(scriptTag)
+document.head.removeChild(scriptTag)
+scriptTag = null
+
 var port = chrome.runtime.connect({
   name: 'content',
 })
@@ -28,13 +37,9 @@ port.onDisconnect.addListener(() => {
 })
 
 port.onMessage.addListener(({type, content}) => {
-  console.log('content got message! :D', type, content);
-  sendMessage(type, content)
-})
-
-function sendMessage(type, content) {
+  console.log(`C3 devtools: got '${type}' message, forwarding to page`);
   window.postMessage({source: 'c3-devtools-bridge', type, content}, '*')
-}
+})
 
 function messageListener(event) {
   if (event.source !== window) {
@@ -47,9 +52,10 @@ function messageListener(event) {
   }
 
   if (message.source === 'c3-devtools-page') {
-    console.log('got window message: ', event.data)
     if (port) {
-      port.postMessage(message)
+      let {type, content} = message
+      console.log(`C3 devtools: got '${type}' message, forwarding to background`);
+      port.postMessage({type, content})
     }
   }
 }
