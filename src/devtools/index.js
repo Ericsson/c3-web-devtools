@@ -16,7 +16,9 @@
 
 'use strict'
 
-var port = chrome.runtime.connect({
+const POLL_INTERVAL = 1000
+
+const port = chrome.runtime.connect({
   name: `devtools-${chrome.devtools.inspectedWindow.tabId}`,
 })
 
@@ -28,7 +30,7 @@ function log(content) {
 port.onMessage.addListener(message => {
   log('devtools got message: ' + JSON.stringify(message))
 
-  let handler = logHandlers[message.type]
+  let handler = messageHandlers[message.type]
   if (handler) {
     handler(message.content)
   } else {
@@ -36,36 +38,7 @@ port.onMessage.addListener(message => {
   }
 })
 
-function executeScript(scriptName) {
-  let script = `
-    if (window.__C3_SDK_INSTANCES__) {
-      let script = document.createElement('script')
-      script.src = "${chrome.extension.getURL(scriptName)}"
-      script.setAttribute('c3DevtoolsExtensionId', '${chrome.runtime.id}')
-      console.log('injecting script', script)
-      document.head.appendChild(script)
-      script.parentNode.removeChild(script)
-    }
-  `
-
-  return new Promise((resolve, reject) => {
-    chrome.devtools.inspectedWindow.eval(script, (res, err) => {
-      if (err) {
-        reject(err)
-      } else {
-        resolve()
-      }
-    })
-  })
-}
-
-function requestData() {
-  log('Requesting data to the panel!')
-  port.postMessage({type: 'devtoolsRequestData'})
-}
-
-
-var logHandlers = {
+const messageHandlers = {
   show(info) {
     chrome.devtools.panels.create("C3 Web",
       "icons/icon128.png",
@@ -83,12 +56,32 @@ var logHandlers = {
     )
   },
   init() {
-    // delay until content is connected
-    executeScript('build/inject.js').then(() => {
-      log('injected script!')
-    }).catch(error => {
-      console.error(error)
-      log(`failed to inject script :( ${error}`)
-    })
+    log('Starting C3 SDK poll')
+    startSdkPoll()
+    // TODO: cleanup panel
   }
+}
+
+var sdkPollIntervalId
+
+function startSdkPoll() {
+  if (sdkPollIntervalId) {
+    clearInterval(sdkPollIntervalId)
+  }
+  sdkPollIntervalId = setInterval(() => {
+    chrome.devtools.inspectedWindow.eval('!!window.__C3_SDK_INSTANCES__', (present, err) => {
+      if (err) {
+        console.warn('Failed to poll C3 SDK presence: ' + err)
+      } else {
+        console.log('C3 SDK present: ' + present) // TODO: nope
+        if (present) {
+          clearInterval(sdkPollIntervalId)
+          onC3Found()
+        }
+      }
+    })
+  }, POLL_INTERVAL)
+}
+
+function onC3Found() {
 }
