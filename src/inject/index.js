@@ -51,7 +51,7 @@ import CircularJSON from 'circular-json'
       console.log(`%cDEVTOOLS%c: ${text}`, 'color: #80f', 'color:')
     },
     devtoolsRequestData() {
-      sendMessage('c3-data', CircularJSON.stringify(window.__CCT_INSTANCES__[0]))
+      sendMessage('c3-data', CircularJSON.stringify(window.__C3_SDK_INSTANCES__.client[0]))
     }
   }
   sendMessage('show')
