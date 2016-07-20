@@ -34,10 +34,14 @@ port.onMessage.addListener(message => {
 })
 
 const messageHandlers = {
-  init() {
+  start() {
     console.log('Starting SDK poll')
     startSdkPoll()
-  }
+  },
+  stop() {
+    clearInterval(sdkPollIntervalId)
+    sdkPollIntervalId = 0
+  },
 }
 
 var sdkPollIntervalId = 0
