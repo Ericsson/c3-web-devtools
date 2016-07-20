@@ -54,9 +54,9 @@ function startSdkPoll() {
   sdkPollIntervalId = setInterval(() => {
     chrome.devtools.inspectedWindow.eval('!!window.__C3_SDK_INSTANCES__', (present, err) => {
       if (err) {
-        console.warn('Failed to poll SDK presence: ' + err)
+        warn('Failed to poll SDK presence: ' + err)
       } else {
-        console.log('SDK present: ' + present) // TODO: nope
+        log('SDK present: ' + present) // TODO: nope
         if (present) {
           clearInterval(sdkPollIntervalId)
           sdkPollIntervalId = 0
@@ -71,9 +71,7 @@ function startSdkPoll() {
 var panelIsPresent = false
 
 function showPanel() {
-  if (panelIsPresent) {
-    port.postMessage({type: 'clearPanel'})
-  } else {
+  if (!panelIsPresent) {
     panelIsPresent = true
     chrome.devtools.panels.create("C3 Web", "icons/icon128.png", "panel.html")
   }
