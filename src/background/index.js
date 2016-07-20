@@ -18,10 +18,6 @@
 
 const ports = {}
 
-chrome.runtime.onConnectExternal.addListener(port => {
-  console.log('got external conneciton', port)
-})
-
 chrome.runtime.onConnect.addListener(port => {
   let name = null
   let tab = null
