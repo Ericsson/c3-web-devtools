@@ -2,6 +2,7 @@
 import React from 'react'
 import CircularJSON from 'circular-json'
 import TreeView from './TreeView'
+import Graph from './Graph'
 
 let styles = {
   rootStyle: {
@@ -26,7 +27,10 @@ class RootView extends React.Component {
     var port = chrome.runtime.connect({
       name: `panel-${chrome.devtools.inspectedWindow.tabId}`,
     })
-    port.onMessage.addListener((event) => {
+    port.onMessage.addListener(event => {
+      var str = CircularJSON.parse(event.content);
+      chrome.devtools.inspectedWindow.eval('console.log(' + str + ');');
+      console.log('Got dem data', event);
       this.setState({
         content: event.content || event,
       })
@@ -37,7 +41,8 @@ class RootView extends React.Component {
   render() {
     let data = 'no data yet...'
     if (this.state.content) {
-      data = <TreeView data={CircularJSON.parse(this.state.content)} depth={1} active={true} label={'root'} />
+      // data = <TreeView data={CircularJSON.parse(this.state.content)} depth={1} active={true} label={'root'} />
+      data = <Graph  />
     }
     return (
       <div style={styles.rootStyle}>

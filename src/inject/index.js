@@ -18,6 +18,9 @@
 
 import CircularJSON from 'circular-json'
 
+const DATA_POLL_INTERVAL = 5 * 1000
+var dataPollIntervalId = 0
+
 function sendMessage(type, content) {
   window.postMessage({source: 'c3-devtools-page', type, content}, '*')
 }
@@ -41,15 +44,17 @@ function messageListener(event) {
 }
 
 window.addEventListener('message', messageListener)
+dataPollIntervalId = setInterval(() => {
+  sendMessage('c3-data', CircularJSON.stringify(window.__C3_SDK_INSTANCES__.deviceSource))
+}, DATA_POLL_INTERVAL)
 
 const messageHandlers = {
   nuke() {
+    clearInterval(dataPollIntervalId)
+    dataPollIntervalId = 0
     window.removeEventListener('message', messageListener)
   },
   devtoolsLog(text) {
     console.log(`%cDEVTOOLS%c: ${text}`, 'color: #80f', 'color:')
-  },
-  devtoolsRequestData() {
-    sendMessage('c3-data', CircularJSON.stringify(window.__C3_SDK_INSTANCES__.client[0]))
   },
 }
